@@ -14,15 +14,14 @@ app.set('view engine', 'ejs');
 app.get('/contact', (req, res) => {
     res.render('contact');
 });
+
 app.get('/', (req, res) => {
     res.render('home');
 });
 
 // Create a route to handle form submissions
-// Create a route to handle form submissions
-// Create a route to handle form submissions
 app.post('/send', (req, res) => {
-    const { name, email, message } = req.body;
+    const { name, email, address, phone, inquiry } = req.body;
 
     // Create a nodemailer transporter (set up your email provider's details)
     const transporter = nodemailer.createTransport({
@@ -36,24 +35,32 @@ app.post('/send', (req, res) => {
     // Email details
     const mailOptions = {
         from: 'pgs22056_mca.maneesh@cbit.org.in',
-        to: 'manishreddygari@gmail.com',
+        to: 'psushma0000@gmail.com',
         subject: `Contact form submission from ${name}`,
-        text: message
+        text: `Name: ${name}\nEmail: ${email}\nAddress: ${address}\nPhone: ${phone}\nInquiry: ${inquiry}`
     };
 
     // Send the email
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
             console.log(error);
-            res.redirect('/contact?error=1');
+            res.status(500).json({ success: false, message: 'Email could not be sent.' });
         } else {
             console.log('Email sent: ' + info.response);
-            res.redirect('/contact?success=1');
+            const emailInfo = {
+                success: true,
+                message: 'Email sent successfully',
+                email: {
+                    from: mailOptions.from,
+                    to: mailOptions.to,
+                    subject: mailOptions.subject,
+                    text: mailOptions.text
+                }
+            };
+            res.status(200).json("mail sent, u can go back");
         }
     });
 });
-
-
 
 // Start the server
 const port = process.env.PORT || 7000;
